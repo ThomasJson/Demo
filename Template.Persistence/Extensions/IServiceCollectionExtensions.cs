@@ -24,7 +24,9 @@ namespace Template.Persistence.Extensions
         private static void AddRepositories(this IServiceCollection services)
         {
             services
-                .AddScoped<AccountRepository>();
+                .AddScoped<AccountRepository>()
+                .AddScoped<IngredientRepository>()
+                .AddScoped<RecipeRepository>();
         }
     }
 }

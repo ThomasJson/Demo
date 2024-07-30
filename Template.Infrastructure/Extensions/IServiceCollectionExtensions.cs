@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using Template.Infrastructure.Services.Authentication;
 using Microsoft.Extensions.Configuration;
+using Template.Infrastructure.Services.Recipe;
 
 namespace Template.Infrastructure.Extensions
 {
@@ -26,7 +27,8 @@ namespace Template.Infrastructure.Extensions
         private static void AddTransient(this IServiceCollection services)
         {
             services
-                .AddTransient<IAuthService, AuthService>();
+                .AddTransient<IAuthService, AuthService>()
+                .AddTransient<IRecipeService, RecipeService>();
         }
 
         private static void AddScoped(this IServiceCollection services)

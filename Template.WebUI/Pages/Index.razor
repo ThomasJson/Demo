@@ -1,10 +1,162 @@
 ﻿@page "/"
 @page "/index"
 
+@using MediatR
+@using Template.Application.Features.Recipe.Shared
+@using Template.Application.Features.Recipe.Queries
+@using Template.Infrastructure.Storage
+@using Template.WebUI.Components
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IMediator Mediator
+
 <PageTitle>Home</PageTitle>
 
-<div class="flex flex-col h-full items-center justify-center">
+<div class="flex flex-row h-full p-4">
 
-    <h1 class="text-xl">Hello, Guest !</h1>
+    <div class="w-1/2 flex flex-col bg-orange-200 p-4 gap-4">
+
+        <h2 class="text-xl font-bold">My Recipes</h2>
+
+        <div class="w-full h-full flex flex-col gap-4">
+
+            @if (_recipeList != null)
+            {
+                @foreach (var recipe in _recipeList)
+                {
+                    <RecipeCard RecipeDto="recipe" />
+                }
+            }
+
+        </div>
+
+    </div>
+
+    <div class="w-1/2 flex flex-col bg-green-200 p-4 gap-2">
+
+        <h2 class="text-xl font-bold">Add a Recipe</h2>
+
+        <EditForm Model="@_newRecipe" OnValidSubmit="HandleValidSubmit">
+
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="w-full flex flex-row justify-between">
+
+                <div class="mb-4">
+                    <label class="block text-gray-700">Recipe Name</label>
+                    <InputText @bind-Value="_newRecipe.Name" class="w-full p-2 border border-gray-400" />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">Number of People</label>
+                    <InputNumber @bind-Value="_newRecipe.NumberOfPeople" class="w-full p-2 border border-gray-400" />
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700">Realization Time (minutes)</label>
+                    <InputText @bind-Value="_newRecipe.RealizationTime" class="w-full p-2 border border-gray-400" />
+                </div>
+
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700">Recipe Description</label>
+                <InputTextArea @bind-Value="_newRecipe.Description" class="w-full p-2 border border-gray-400" />
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 mb-1">Ingredients List</label>
+                @foreach (var ingredient in _newRecipe.Ingredients)
+                {
+                    <div class="flex flex-row items-center mb-2">
+                        <InputText @bind-Value="ingredient.Name" class="w-1/2 p-2 border border-gray-400 mr-2" placeholder="Ingredient Name" />
+                        <InputText @bind-Value="ingredient.Quantity" class="w-1/4 p-2 border border-gray-400 mr-2" placeholder="Quantity" />
+                        <button type="button" class="bg-red-500 text-white p-2 rounded" @onclick="@(() => RemoveIngredient(ingredient))">-</button>
+                    </div>
+                }
+                <button type="button" class="border-2 border-gray-500 text-gray-700 p-2 rounded" @onclick="AddIngredient">+ Add new Ingredient</button>
+            </div>
+
+            <button type="submit" class="bg-green-500 text-white p-2 rounded">Add Recipe</button>
+
+        </EditForm>
+
+    </div>
 
 </div>
+
+@code {
+
+    private RecipeDto _newRecipe = new();
+    private List<RecipeDto> _recipeList = new();
+    private int _accountId = 0;
+    private bool _isAuthenticated = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _accountId = await GetAuthenticatedAccountId();
+
+        if (_accountId != 0)
+        {
+            _isAuthenticated = true;
+            _recipeList = await Mediator.Send(new GetAllRecipesByAccountIdQuery(_accountId));
+        }
+        else
+        {
+            _isAuthenticated = false;
+        }
+
+    }
+
+    private async Task<int> GetAuthenticatedAccountId()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            var accountIdClaim = user.FindFirst(CustomClaimTypes.AccountId);
+            if (accountIdClaim != null)
+            {
+                return int.Parse(accountIdClaim.Value);
+            }
+        }
+
+        return 0;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (_isAuthenticated == false)
+        {
+            return;
+        }
+
+        _newRecipe.AccountId = await GetAuthenticatedAccountId();
+
+        RecipeDto recipeAdded = await Mediator.Send(new AddNewRecipeQuery(_newRecipe));
+
+        if (recipeAdded != null)
+        {
+            AddToRecipeList(recipeAdded);
+        }
+        _newRecipe = new();
+        StateHasChanged();
+    }
+
+    private void AddIngredient()
+    {
+        _newRecipe.Ingredients.Add(new IngredientDto());
+    }
+
+    private void RemoveIngredient(IngredientDto ingredient)
+    {
+        _newRecipe.Ingredients.Remove(ingredient);
+    }
+
+    private void AddToRecipeList(RecipeDto newRecipe)
+    {
+        _recipeList.Add(newRecipe);
+    }
+
+}

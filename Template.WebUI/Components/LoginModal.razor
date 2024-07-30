@@ -80,7 +80,7 @@
         var account = await Mediator.Send(new GetAuthenticationQuery(_currentAccount));
 
         // Assign data to Storage
-        var storageSession = SessionHandler.AssignDataToCurrentSession(account.UserFirstName, account.RoleName);
+        var storageSession = SessionHandler.GetAccountSession(account.Id, account.UserFirstName, account.RoleName);
 
         var authStateProvider = (AuthStateProvider)authenticationStateProvider;
         await authStateProvider.UpdateAuthenticationState(storageSession);

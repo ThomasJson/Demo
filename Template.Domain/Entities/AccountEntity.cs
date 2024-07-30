@@ -20,5 +20,7 @@ namespace Template.Domain.Entities
         public UserEntity User { get; set; }
 
         public ICollection<AccountRoleLinkEntity> RolesLink { get; set; }
+        public ICollection<RecipeEntity> Recipes { get; set; }
     }
+
 }

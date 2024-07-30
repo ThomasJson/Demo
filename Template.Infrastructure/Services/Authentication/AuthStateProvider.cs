@@ -28,6 +28,7 @@ namespace Template.Infrastructure.Services.Authentication
 
                 var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
                 {
+                    new Claim(CustomClaimTypes.AccountId, accountSession.Id.ToString()),
                     new Claim(ClaimTypes.Name, accountSession.UserName),
                     new Claim(ClaimTypes.Role, accountSession.Role)
                 }, "CustomAuth"));
@@ -49,6 +50,7 @@ namespace Template.Infrastructure.Services.Authentication
                 await _sessionStorage.SetAsync("AccountSession", accountSession);
                 claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
                 {
+                    new Claim(CustomClaimTypes.AccountId, accountSession.Id.ToString()),
                     new Claim(ClaimTypes.Name, accountSession.UserName),
                     new Claim(ClaimTypes.Role, accountSession.Role)
                 }));

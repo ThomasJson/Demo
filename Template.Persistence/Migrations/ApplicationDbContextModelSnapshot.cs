@@ -75,6 +75,88 @@ namespace Template.Persistence.Migrations
                     b.ToTable("AccountRoleLinks");
                 });
 
+            modelBuilder.Entity("Template.Domain.Entities.IngredientEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Ingredients");
+                });
+
+            modelBuilder.Entity("Template.Domain.Entities.RecipeEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AccountId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("NumberOfPeople")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RealizationTime")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.ToTable("Recipes");
+                });
+
+            modelBuilder.Entity("Template.Domain.Entities.RecipeIngredientLinkEntity", b =>
+                {
+                    b.Property<int>("RecipeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IngredientId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Quantity")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("RecipeId", "IngredientId");
+
+                    b.HasIndex("IngredientId");
+
+                    b.ToTable("RecipeIngredientLinks");
+                });
+
             modelBuilder.Entity("Template.Domain.Entities.RoleEntity", b =>
                 {
                     b.Property<int>("Id")
@@ -161,9 +243,51 @@ namespace Template.Persistence.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("Template.Domain.Entities.RecipeEntity", b =>
+                {
+                    b.HasOne("Template.Domain.Entities.AccountEntity", "Account")
+                        .WithMany("Recipes")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+                });
+
+            modelBuilder.Entity("Template.Domain.Entities.RecipeIngredientLinkEntity", b =>
+                {
+                    b.HasOne("Template.Domain.Entities.IngredientEntity", "Ingredient")
+                        .WithMany("RecipeLinks")
+                        .HasForeignKey("IngredientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Template.Domain.Entities.RecipeEntity", "Recipe")
+                        .WithMany("IngredientLinks")
+                        .HasForeignKey("RecipeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Ingredient");
+
+                    b.Navigation("Recipe");
+                });
+
             modelBuilder.Entity("Template.Domain.Entities.AccountEntity", b =>
                 {
+                    b.Navigation("Recipes");
+
                     b.Navigation("RolesLink");
+                });
+
+            modelBuilder.Entity("Template.Domain.Entities.IngredientEntity", b =>
+                {
+                    b.Navigation("RecipeLinks");
+                });
+
+            modelBuilder.Entity("Template.Domain.Entities.RecipeEntity", b =>
+                {
+                    b.Navigation("IngredientLinks");
                 });
 
             modelBuilder.Entity("Template.Domain.Entities.RoleEntity", b =>
