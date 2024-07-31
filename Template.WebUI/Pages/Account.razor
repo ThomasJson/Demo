@@ -10,9 +10,9 @@
 <AuthorizeView Roles="Admin, User">
 
     <Authorized>
-        <div class="flex flex-row gap-2">
+        <div class="flex flex-row gap-2 p-4">
 
-            <a class="border border-1 p-2" @onclick="Logout" href="javascript:void(0)">Logout</a>
+            <a class="border border-1 py-2 bg-red-500 text-white px-4 rounded" @onclick="Logout" href="javascript:void(0)">Logout</a>
 
         </div>
     </Authorized>

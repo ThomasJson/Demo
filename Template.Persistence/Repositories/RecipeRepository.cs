@@ -29,6 +29,19 @@ namespace Template.Persistence.Repositories
             .ToListAsync();
         }
 
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var recipeEntity = await _context.Recipes.FindAsync(id);
+            if (recipeEntity == null)
+            {
+                return false;
+            }
+
+            _context.Recipes.Remove(recipeEntity);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
         public void Dispose()
         {
             _context.Dispose();

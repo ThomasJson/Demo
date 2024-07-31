@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Azure.Core;
+using Microsoft.Extensions.Logging;
 using Template.Application.Features.Recipe.Shared;
 using Template.Application.Interfaces.Services;
 using Template.Domain.Entities;
@@ -34,7 +35,7 @@ namespace Template.Infrastructure.Services.Recipe
             
         }
 
-        public async Task<RecipeEntity> AddNewRecipeAsync(RecipeDto recipeDto)
+        public async Task<RecipeEntity> AddNewRecipe(RecipeDto recipeDto)
         {
             try
             {
@@ -73,6 +74,18 @@ namespace Template.Infrastructure.Services.Recipe
             catch (Exception ex)
             {
                 throw new ApplicationException("An error occurred while adding the new recipe.", ex);
+            }
+        }
+
+        public async Task<bool> DeleteRecipe(int id)
+        {
+            try
+            {
+                return await _recipeRepository.DeleteAsync(id);
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("An error occurred while deleting the selected recipe.", ex);
             }
         }
 

@@ -5,8 +5,9 @@ namespace Template.Application.Interfaces.Services
 {
     public interface IRecipeService
     {
-        Task<RecipeEntity> AddNewRecipeAsync(RecipeDto recipeDto);
+        Task<RecipeEntity> AddNewRecipe(RecipeDto recipeDto);
         Task<List<RecipeEntity>> GetAllRecipesByAccountId(int id);
+        Task<bool> DeleteRecipe(int id);
     }
 
 }

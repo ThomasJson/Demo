@@ -17,7 +17,7 @@ namespace Template.Application.Features.Recipe.Queries
 
         public async Task<RecipeDto> Handle(AddNewRecipeQuery query, CancellationToken cancellationToken)
         {
-            var recipeEntity = await _recipeService.AddNewRecipeAsync(query.RecipeDto);
+            var recipeEntity = await _recipeService.AddNewRecipe(query.RecipeDto);
 
             if (recipeEntity != null)
             {

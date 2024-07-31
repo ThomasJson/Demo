@@ -20,12 +20,16 @@
 
         <div class="w-full h-full flex flex-col gap-4">
 
-            @if (_recipeList != null)
+            @if (_recipeList != null && _recipeList.Any())
             {
                 @foreach (var recipe in _recipeList)
                 {
-                    <RecipeCard RecipeDto="recipe" />
+                    <RecipeCard RecipeDto="recipe" OnDelete="DeleteRecipe" />
                 }
+            }
+            else
+            {
+                <p class="text-xl italic">Sign in to see your Recipes</p>
             }
 
         </div>
@@ -39,22 +43,24 @@
         <EditForm Model="@_newRecipe" OnValidSubmit="HandleValidSubmit">
 
             <DataAnnotationsValidator />
-            <ValidationSummary />
 
             <div class="w-full flex flex-row justify-between">
 
                 <div class="mb-4">
                     <label class="block text-gray-700">Recipe Name</label>
                     <InputText @bind-Value="_newRecipe.Name" class="w-full p-2 border border-gray-400" />
+                    <ValidationMessage For="@(() => _newRecipe.Name)" class="text-red-500" />
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-700">Number of People</label>
                     <InputNumber @bind-Value="_newRecipe.NumberOfPeople" class="w-full p-2 border border-gray-400" />
+                    <ValidationMessage For="@(() => _newRecipe.NumberOfPeople)" class="text-red-500" />
                 </div>
 
                 <div class="mb-4">
                     <label class="block text-gray-700">Realization Time (minutes)</label>
                     <InputText @bind-Value="_newRecipe.RealizationTime" class="w-full p-2 border border-gray-400" />
+                    <ValidationMessage For="@(() => _newRecipe.RealizationTime)" class="text-red-500" />
                 </div>
 
             </div>
@@ -69,15 +75,32 @@
                 @foreach (var ingredient in _newRecipe.Ingredients)
                 {
                     <div class="flex flex-row items-center mb-2">
+
                         <InputText @bind-Value="ingredient.Name" class="w-1/2 p-2 border border-gray-400 mr-2" placeholder="Ingredient Name" />
+                        <ValidationMessage For="@(() => ingredient.Name)" class="text-red-500" />
+
                         <InputText @bind-Value="ingredient.Quantity" class="w-1/4 p-2 border border-gray-400 mr-2" placeholder="Quantity" />
+                        <ValidationMessage For="@(() => ingredient.Quantity)" class="text-red-500" />
+
                         <button type="button" class="bg-red-500 text-white p-2 rounded" @onclick="@(() => RemoveIngredient(ingredient))">-</button>
                     </div>
                 }
                 <button type="button" class="border-2 border-gray-500 text-gray-700 p-2 rounded" @onclick="AddIngredient">+ Add new Ingredient</button>
             </div>
 
-            <button type="submit" class="bg-green-500 text-white p-2 rounded">Add Recipe</button>
+            @if (_isAuthenticated == false)
+            {
+                <div class="flex flex-row gap-2 items-center">
+                    <button type="submit" class="bg-green-500 text-white p-2 rounded" disabled>Add Recipe</button>
+                    <p class="italic">Sign in to add a new Recipe</p>
+                </div>
+                
+            }
+            else
+            {
+                <button type="submit" class="bg-green-500 text-white p-2 rounded">Add Recipe</button>
+            }
+            
 
         </EditForm>
 
@@ -140,8 +163,23 @@
         {
             AddToRecipeList(recipeAdded);
         }
+
         _newRecipe = new();
         StateHasChanged();
+    }
+
+    private async Task DeleteRecipe(RecipeDto recipe)
+    {
+        bool result = await Mediator.Send(new DeleteRecipeQuery(recipe.Id));
+        if (result)
+        {
+            _recipeList.Remove(recipe);
+            StateHasChanged();
+        }
+        else
+        {
+            return;
+        }
     }
 
     private void AddIngredient()
